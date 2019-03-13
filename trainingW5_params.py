@@ -2,7 +2,7 @@ from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import timedelta
 from backtester.dataSource.csv_data_source import CsvDataSource
-from backtester.timeRule.nse_time_rule import NSETimeRule
+from backtester.timeRule.custom_time_rule import CustomTimeRule
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -223,7 +223,7 @@ class MyTradingParams(TradingSystemParameters):
     a lot of time, you realistically wont be able to keep upto pace.
     '''
     def getTimeRuleForUpdates(self):
-        return NSETimeRule(startDate=self.__startDate, endDate=self.__endDate, frequency='M', sample='30')
+        return CustomTimeRule(startDate=self.__startDate, endDate=self.__endDate, startTime='9:30', endTime='15:30', frequency='M', sample='30')
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -239,7 +239,7 @@ class MyTradingParams(TradingSystemParameters):
         return 'SPY'
 
     def getStartingCapital(self):
-        if self.__tradingFunctions.getSymbolsToTrade()>0:
+        if len(self.__tradingFunctions.getSymbolsToTrade())>0:
             return 1000*len(self.__tradingFunctions.getSymbolsToTrade())
         else:
             return 30000

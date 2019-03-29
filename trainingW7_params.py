@@ -62,21 +62,16 @@ class MyTradingFunctions():
     '''
     Specify all Features you want to use by  by creating config dictionaries.
     Create one dictionary per feature and return them in an array.
-
     Feature config Dictionary have the following keys:
-
         featureId: a str for the type of feature you want to use
         featureKey: {optional} a str for the key you will use to call this feature
                     If not present, will just use featureId
         params: {optional} A dictionary with which contains other optional params if needed by the feature
-
     msDict = {'featureKey': 'ms_5',
               'featureId': 'moving_sum',
               'params': {'period': 5,
                          'featureName': 'basis'}}
-
     return [msDict]
-
     You can now use this feature by in getPRediction() calling it's featureKey, 'ms_5'
     '''
 
@@ -159,11 +154,11 @@ class MyTradingFunctions():
                                'instrumentId1': PAIRIDS[2][0],
                                 'instrumentId2': PAIRIDS[2][1],
                                 'featureName': 'stockVWAP'}}
-        
+
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratio1Dict, ma11Dict, ma21Dict, sdev1Dict, correl1Dict, 
+        return [ratio1Dict, ma11Dict, ma21Dict, sdev1Dict, correl1Dict,
                 ratio2Dict, ma12Dict, ma22Dict, sdev2Dict, correl2Dict]
 
     '''
@@ -178,7 +173,6 @@ class MyTradingFunctions():
         ms5 = ms5Data.iloc[-1]
     You can call last datapoint for one stock 'ABC' as
         value_for_abs = ms5['ABC']
-
     Output of the prediction function is used by the toolbox to make further trading decisions and evaluate your score.
     '''
 
@@ -195,7 +189,7 @@ class MyTradingFunctions():
         #############################################################################################
 
         lookbackMarketFeatures = instrumentManager.getDataDf()
-        
+
         if len(lookbackMarketFeatures)>0:
             currentMarketFeatures = lookbackMarketFeatures.iloc[-1]
             # IMPLEMENT THIS
@@ -238,14 +232,11 @@ class MyCustomFeature(Feature):
     ''''
     Custom Feature to implement for instrument. This function would return the value of the feature you want to implement.
     1. create a new class MyCustomFeatureClassName for the feature and implement your logic in the function computeForInstrument() -
-
     2. modify function getCustomFeatures() to return a dictionary with Id for this class
         (follow formats like {'my_custom_feature_identifier': MyCustomFeatureClassName}.
         Make sure 'my_custom_feature_identifier' doesnt conflict with any of the pre defined feature Ids
-
         def getCustomFeatures(self):
             return {'my_custom_feature_identifier': MyCustomFeatureClassName}
-
     3. create a dict for this feature in getInstrumentFeatureConfigDicts() above. Dict format is:
             customFeatureDict = {'featureKey': 'my_custom_feature_key',
                                 'featureId': 'my_custom_feature_identifier',
@@ -377,12 +368,15 @@ class MyTradingParams(TradingSystemParameters):
                      'featureId': 'benchmark_PnL',
                      'params': {'pnlKey': 'pnl'}}
 
+        scoreDict = {'featureKey': 'score',
+                     'featureId': 'benchmark_PnL',
+                     'params': {'pnlKey': 'pnl'}}
 
         stockFeatureConfigs = self.__tradingFunctions.getInstrumentFeatureConfigDicts()
 
 
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [predictionDict,
-        spreadConfigDict, feesConfigDict,profitlossConfigDict,capitalConfigDict,benchmarkDict]}
+        spreadConfigDict, feesConfigDict,profitlossConfigDict,capitalConfigDict,benchmarkDict, scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -394,7 +388,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getMarketFeatureConfigDicts(self):
     # ADD RELEVANT FEATURES HERE
-        scoreDict = {'featureKey': 'Score',
+        scoreDict = {'featureKey': 'score',
                      'featureId': 'score_ll',
                      'params': {'featureName': self.getPriceFeatureKey(),
                                 'instrument_score_feature': 'benchmark'}}
@@ -417,10 +411,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystem(enter_threshold=0.7, 
-                                    exit_threshold=0.55, 
+        return SimpleExecutionSystem(enter_threshold=0.7,
+                                    exit_threshold=0.55,
                                     longLimit=10000,
-                                    shortLimit=10000, 
+                                    shortLimit=10000,
                                     capitalUsageLimit=0.10 * self.getStartingCapital(),
                                     enterlotSize = 10000, exitlotSize = 10000,
                                     limitType='D', price='stockVWAP')
@@ -460,19 +454,19 @@ class MyTradingParams(TradingSystemParameters):
 
     def setCapital(self, capital=5000):
         self.__capitalMultiplier = capital
-    
+
     def getCapital(self):
         return self.__capitalMultiplier
 
     def getStartDate(self):
         return self.__startDate
-    
+
     def getEndDate(self):
         return self.__endDate
 
     def setStartDate(self, date):
         self.__startDate = date
-    
+
     def setEndDate(self, date):
         self.__endDate = date
 
@@ -521,7 +515,7 @@ class FeesCalculator(Feature):
 
         fees = fees*currentPrice + np.abs(changeInPosition)*instrumentLookbackData.getFeatureDf(featureParams['spread']).iloc[-1]
         return fees
-        
+
 
 
 class BuyHoldPnL(Feature):

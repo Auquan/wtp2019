@@ -414,7 +414,8 @@ class MyTradingParams(TradingSystemParameters):
                 'prediction': TrainingPredictionFeature,
                 'spread': SpreadCalculator,
                 'fees_and_spread': FeesCalculator,
-                'benchmark_PnL': BuyHoldPnL}
+                'benchmark_PnL': BuyHoldPnL,
+                'Sharpe': SharpeCalculator}
 
 
     def getInstrumentFeatureConfigDicts(self):
@@ -439,7 +440,7 @@ class MyTradingParams(TradingSystemParameters):
                              'params': {'price': 'stockVWAP',
                                         'fees': 'fees',
                                         'capitalReqPercent': 0.95}}
-        benchmarkDict = {'featureKey': 'benchmark',
+        scoreDict = {'featureKey': 'score',
                      'featureId': 'benchmark_PnL',
                      'params': {'pnlKey': 'pnl'}}
 
@@ -448,7 +449,7 @@ class MyTradingParams(TradingSystemParameters):
 
 
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [predictionDict,
-        spreadConfigDict, feesConfigDict,profitlossConfigDict,capitalConfigDict,benchmarkDict]}
+        spreadConfigDict, feesConfigDict,profitlossConfigDict,capitalConfigDict,scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -460,10 +461,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getMarketFeatureConfigDicts(self):
     # ADD RELEVANT FEATURES HERE
-        scoreDict = {'featureKey': 'Score',
-                     'featureId': 'score_ll',
-                     'params': {'featureName': self.getPriceFeatureKey(),
-                                'instrument_score_feature': 'benchmark'}}
+        scoreDict = {'featureKey': 'score',
+                     'featureId': 'Sharpe',
+                     'params': {}}
 
         marketFeatureConfigs = self.__tradingFunctions.getMarketFeatureConfigDicts()
         return marketFeatureConfigs + [scoreDict]
@@ -601,6 +601,21 @@ class BuyHoldPnL(Feature):
             bhpnl += priceData.iloc[-1] - priceData.iloc[-2]
 
         return bhpnl
+
+
+class SharpeCalculator(Feature):
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackMarketFeatures = instrumentManager.getDataDf()
+
+        pnl = lookbackMarketFeatures['pnl'].iloc[-1]
+        var = lookbackMarketFeatures['variance'].iloc[-1]
+        if var !=0:
+            sharpe = pnl/np.sqrt(var)
+        else:
+            sharpe = 0
+
+        return 0
 
 
 if __name__ == "__main__":

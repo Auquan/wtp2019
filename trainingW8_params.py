@@ -377,6 +377,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentsIds(self):
         return self.__instrumentIds
+    
+    def setInstrumentsIds(self, instrumentIds):
+        self.__instrumentIds = instrumentIds
 
     def setFees(self):
         return {'brokerage': 0.0001,'spread': 'spread'}
